@@ -1,0 +1,26 @@
+{
+  "name": "ecomac/echo-log",
+  "version": "0.1.0",
+  "description": "Descripción de tu paquete",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Ecomac\\EchoLog\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.1",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+    "illuminate/console": "^12.14"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Ecomac\\EchoLog\\EchoLogServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
