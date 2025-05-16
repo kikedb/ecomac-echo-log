@@ -1,7 +1,7 @@
 {
   "name": "ecomac/echo-log",
-  "version": "0.1.0",
-  "description": "Descripción de tu paquete",
+  "version": "0.2.0",
+  "description": "EchoLog es un paquete para Laravel que monitorea el archivo de logs de tu aplicación y envía alertas cuando detecta errores repetitivos. Es ideal para mantener un seguimiento proactivo de fallos en producción mediante notificaciones por Discord y correo electrónico.",
   "type": "library",
   "license": "MIT",
   "autoload": {
