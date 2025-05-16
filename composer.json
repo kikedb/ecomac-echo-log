@@ -11,8 +11,14 @@
   },
   "require": {
     "php": "^8.1",
+    "guzzlehttp/guzzle": "^7.0",
     "illuminate/support": "^10.0 || ^11.0 || ^12.0",
-    "illuminate/console": "^12.14"
+    "illuminate/console": "^12.14",
+    "illuminate/http": "^12.14",
+    "nesbot/carbon": "^3.9",
+    "illuminate/mail": "^10.0|^11.0|^12.0",
+    "illuminate/view": "^10.0|^11.0|^12.0",
+    "illuminate/queue": "^10.0|^11.0|^12.0"
   },
   "extra": {
     "laravel": {

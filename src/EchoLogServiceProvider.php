@@ -17,7 +17,7 @@ class EchoLogServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/echo-log.php' => $this->app->basePath('config/echo-log.php'),
         ], 'echo-log-config');
-
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'echo-log');
         // Registra el comando si se ejecuta en la consola
         if ($this->app->runningInConsole()) {
             $this->commands([

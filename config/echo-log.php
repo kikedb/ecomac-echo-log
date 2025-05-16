@@ -4,44 +4,63 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Habilitar monitoreo de logs
+    | Cooldown Time Between Alerts (in minutes)
     |--------------------------------------------------------------------------
+    |
+    | Minimum amount of time that must pass before the same error is notified again.
+    |
     */
-    'enabled' => env('ECHO_LOG_ENABLED', true),
+
+    'cooldown_minutes' => env('ECHO_LOG_COOLDOWN_MINUTES', 10),
 
     /*
     |--------------------------------------------------------------------------
-    | Ventana de escaneo (en minutos)
+    | Log Scan Window (in minutes)
     |--------------------------------------------------------------------------
+    |
+    | Number of minutes to look back in the logs to count repeated errors.
+    |
     */
-    'scan_window_minutes' => env('ECHO_LOG_SCAN_WINDOW', 5),
+
+    'scan_window_minutes' => env('ECHO_LOG_SCAN_WINDOW_MINUTES', 10),
 
     /*
     |--------------------------------------------------------------------------
-    | Cooldown entre alertas iguales (en minutos)
+    | Email Recipients
     |--------------------------------------------------------------------------
+    |
+    | List of email addresses that will receive notifications about log errors.
+    |
     */
-    'cooldown_minutes' => env('ECHO_LOG_COOLDOWN', 15),
+
+    'email_recipients' => explode(',', env('ECHO_LOG_EMAIL_RECIPIENTS', '')),
 
     /*
     |--------------------------------------------------------------------------
-    | Webhook de Discord
+    | Application Name and URL
     |--------------------------------------------------------------------------
+    |
+    | These values are used in the alerts to identify which app is sending the notification.
+    |
     */
-    'discord_webhook' => env('ECHO_LOG_DISCORD_WEBHOOK'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | IDs de usuarios a mencionar en Discord
-    |--------------------------------------------------------------------------
-    */
-    'mention_user_ids' => explode(',', env('ECHO_LOG_DISCORD_USERS', '')),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Nombre de la fuente que aparece en las alertas
-    |--------------------------------------------------------------------------
-    */
     'app_name' => env('ECHO_LOG_APP_NAME', env('APP_NAME', 'Laravel')),
+    'app_url' => env('ECHO_LOG_APP_URL', env('APP_URL', 'https://example.com')),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Notification Services
+    |--------------------------------------------------------------------------
+    |
+    | Settings for external services used to send notifications, such as Discord.
+    |
+    */
+
+    'services' => [
+        'discord' => [
+            'webhook_url' => env('DISCORD_WEBHOOK_URL'),
+            'mention_user_ids' => explode(',', env('DISCORD_MENTION_USER_IDS', '')),
+            'app_name' => env('APP_NAME', 'Laravel'),
+        ],
+    ]
 ];
