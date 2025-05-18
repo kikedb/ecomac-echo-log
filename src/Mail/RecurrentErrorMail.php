@@ -5,37 +5,49 @@ namespace Ecomac\EchoLog\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Ecomac\EchoLog\Dto\RecurrentErrorDto;
 
-class RecurrentErrorMail extends Mailable implements ShouldQueue
+/**
+ * Class RecurrentErrorMail
+ *
+ * Mailable class to send emails related to recurrent errors.
+ */
+class RecurrentErrorMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $messageText;
-    public int $count;
-    public string $emoji;
-    public string $title;
-    public string $type;
-    public string $sourceName;
-    public int $scanWindow;
-    public string $logViewerUrl;
+    /**
+     * The DTO containing recurrent error information.
+     *
+     * @var RecurrentErrorDto
+     */
+    public RecurrentErrorDto $recurrentError;
 
-    public function __construct(string $messageText, int $count, string $emoji, string $title, string $type, string $sourceName, int $scanWindow, string $logViewerUrl)
+    /**
+     * Constructor.
+     *
+     * @param RecurrentErrorDto $recurrentError DTO with details about the recurrent error.
+     */
+    public function __construct(RecurrentErrorDto $recurrentError)
     {
-        $this->messageText = $messageText;
-        $this->count = $count;
-        $this->emoji = $emoji;
-        $this->title = $title;
-        $this->type = $type;
-        $this->sourceName = $sourceName;
-        $this->scanWindow = $scanWindow;
-        $this->logViewerUrl = $logViewerUrl;
+        $this->recurrentError = $recurrentError;
     }
 
+    /**
+     * Build the email message.
+     *
+     * Sets the subject based on the error category and context,
+     * and specifies the view to be used for the email body.
+     *
+     * @return $this
+     */
     public function build()
     {
+        $errorCategory = $this->recurrentError->details->category;
+        $errorContext = $this->recurrentError->context;
+
         return $this
-            ->subject("{$this->emoji} [{$this->sourceName} → Mail] {$this->title}")
+            ->subject("{$errorCategory->emoji} [{$errorContext->sourceName} → {$errorCategory->type}] {$errorCategory->title}")
             ->view('echo-log::mails.recurrent-error');
     }
 }
