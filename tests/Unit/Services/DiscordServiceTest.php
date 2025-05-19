@@ -22,7 +22,7 @@ class DiscordServiceTest extends TestCase
         $service->sendNotification($dto, ['123456789']);
 
         Http::assertSent(function ($request) {
-            return $request->url() === 'https://discord.com/api/webhook-test'
+            return $request->url() ===  $this->app['config']->get('echo-log.services.discord.webhook_url')
                 && $request['content'] === '<@123456789>'
                 && isset($request['embeds'][0]['title'])
                 && str_contains($request['embeds'][0]['title'], '❗') // emoji

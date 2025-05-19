@@ -19,7 +19,7 @@ class EmailServiceTest extends TestCase
         Mail::fake();
         $emailService = new EmailService();
         $dto = $this->makeDummyDto();
-        $recipients = explode(',', $this->app['config']->get('echo-log.email_recipients'));
+        $recipients = $this->app['config']->get('echo-log.email_recipients');
         $emailService->sendNotification($dto, $recipients);
         Mail::assertSent(RecurrentErrorMail::class, $recipients);
         Mail::assertSent(RecurrentErrorMail::class, count($recipients));

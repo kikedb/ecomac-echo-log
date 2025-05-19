@@ -17,7 +17,6 @@ class LogReaderServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Simula la existencia de un archivo de log para la fecha actual
         $this->clock = app()->make(ClockProvider::class);
         $now = $this->clock->createFromFormat('Y-m-d','2024-05-19');
         $this->logFile = storage_path('logs/laravel-' . $now->format('Y-m-d') . '.log');
@@ -65,7 +64,6 @@ class LogReaderServiceTest extends TestCase
         
         $service = new LogReaderService($mockClock);
         $errors = $service->getRecentErrors(10);
-
         $this->assertInstanceOf(Collection::class, $errors);
         $this->assertCount(7, $errors);
         $this->assertStringContainsString('Example error 1', $errors[5][0]);

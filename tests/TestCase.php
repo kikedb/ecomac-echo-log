@@ -16,8 +16,13 @@ abstract class TestCase extends BaseTestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        $app['config']->set('echo-log.services.discord.webhook_url', 'https://discord.com/api/webhook-test');
-        $app['config']->set('echo-log.email_recipients', 'example@mail.com,example2@mail.com');
+        $app['config']->set('echo-log.email_recipients', ['example@mail.com', 'example2@mail.com']);
 
+        $app['config']->set('echo-log.services.discord.webhook_url', 'https://discord.com/api/webhook-test');
+        $app['config']->set('echo-log.services.discord.mention_user_ids', ['123456','7891011']);
+        $app['config']->set('echo-log.services.discord.app_name', 'Mi App');
+
+        $app['config']->set('echo-log.app_name', 'Mi App');
+        $app['config']->set('echo-log.app_url', 'https://miapp.test');
     }
 }

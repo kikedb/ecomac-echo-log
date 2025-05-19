@@ -11,6 +11,11 @@ use Ecomac\EchoLog\Services\ErrorNotifierService;
 /**
  * Console command that monitors the Laravel log
  * and notifies about frequently recurring errors.
+ *
+ * This command analyzes the latest Laravel log entries and groups
+ * errors by severity level and message. If an error appears more
+ * times than the configured threshold within the scan window, it sends
+ * a notification (e.g., email or external alert).
  */
 class MonitorLogError extends Command
 {
@@ -29,12 +34,12 @@ class MonitorLogError extends Command
     protected $description = 'Monitors Laravel log and notifies repeated errors';
 
     /**
-     * Command constructor.
+     * Creates a new command instance.
      *
-     * @param ClockProvider $clockProvider Service to get the current time
-     * @param LogReaderService $logReaderService Service to read recent errors from the log
+     * @param ClockProvider $clockProvider Provides the current time and date
+     * @param LogReaderService $logReaderService Service to read recent log entries
      * @param ErrorNotifierService $errorNotifier Service to send error notifications
-     * @param ErrorNotificationCacheService $cache Service to avoid duplicate notifications
+     * @param ErrorNotificationCacheService $cache Cache service to avoid duplicate notifications
      */
     public function __construct(
         private ClockProvider $clockProvider,
@@ -46,60 +51,89 @@ class MonitorLogError extends Command
     }
 
     /**
-     * Executes the console command.
+     * Executes the command: scans the Laravel log, groups repeated errors
+     * by level and message, and sends notifications if needed.
+     *
+     * The number of occurrences required for notification is defined
+     * per level in the `config/echolog.php` file.
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        try{
+        try {
             $this->info("Starting to monitor errors in the Laravel log...");
 
             $cooldown = config('echo-log.cooldown_minutes');
             $scanWindow = config('echo-log.scan_window_minutes');
 
-            // Validate config values
-            $configIsValid = $this->validateConfig($cooldown, $scanWindow);
-            if (!$configIsValid) {
+            if (!$this->validateConfig($cooldown, $scanWindow)) {
                 return;
             }
 
-            // Get recent errors within the scan window
-            $recentErrors = $this->logReaderService->getRecentErrors($scanWindow);
+            $levels = config('echolog.levels');
+            $recentErrorsRaw = $this->logReaderService->getRecentErrors($scanWindow);
 
-            // Group errors by message (index 2 of the array)
-            $grouped = $recentErrors->groupBy(fn($m) => $m[2]);
+            // Mapear errores con nivel, mensaje y fecha
+            $parsedErrors = collect($recentErrorsRaw)->map(function ($error) {
+                $rawLine = $error[0]; // Formato completo del log
+                $timestamp = $error[1];
+                $message = $error[2];  // Solo el mensaje de error
 
-            // Process each group of repeated errors
-            foreach ($grouped as $errorMessage => $instances) {
-                if (count($instances) < 3) continue; // Only consider errors with 3+ occurrences
+                // Extraer el nivel del formato local.ERROR:
+                preg_match('/\.([A-Z]+):/', $rawLine, $matches);
+                $level = $matches[1] ?? 'UNKNOWN';
 
-                $hash = md5($errorMessage);
+                return [
+                    'raw_line' => $rawLine,  // Mantenemos la línea completa para notificación
+                    'level' => $level,      // Nivel extraído (ERROR, WARNING, etc.)
+                    'message' => $message,   // Solo el mensaje
+                    'timestamp' => $timestamp,
+                ];
+            });
 
-                // Check if this error should be notified
-                if ($this->cache->shouldNotify($hash, $cooldown)) {
-                    $this->errorNotifier->send($errorMessage, count($instances), $scanWindow);
-                    $this->cache->markAsNotified($hash);
-                }
-                else {
-                    $this->warn("Repeated error already notified: \"$errorMessage\" with " . count($instances) . " occurrences.");
+            // Agrupar por nivel
+            $groupedByLevel = $parsedErrors->groupBy('level');
+
+            foreach ($groupedByLevel as $level => $errorsByLevel) {
+                $countRequired = $levels[$level]['count'] ?? 3;
+
+                $groupedByMessage = collect($errorsByLevel)->groupBy('message');
+
+                foreach ($groupedByMessage as $message => $instances) {
+                    if (count($instances) < $countRequired) {
+                        continue;
+                    }
+
+                    $hash = md5($level . $message);
+
+                    if ($this->cache->shouldNotify($hash, $cooldown)) {
+                        // Enviamos la línea completa del primer error del grupo
+                        $this->errorNotifier->send(
+                            $instances->first()['raw_line'], 
+                            count($instances), 
+                            $scanWindow
+                        );
+                        $this->cache->markAsNotified($hash);
+                    } else {
+                        $this->warn("Ya fue notificado: [$level] \"$message\" con " . count($instances) . " repeticiones.");
+                    }
                 }
             }
 
-            // Clean old cache entries
             $this->cache->clean();
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->error("An error occurred: " . $e->getMessage());
         }
     }
 
     /**
-     * Validates that the config values are within acceptable ranges.
+     * Valid--- Expected
+     * are within acceptable boundaries (1 to 60 minutes).
      *
-     * @param int $cooldown Minimum interval in minutes between notifications for the same error
-     * @param int $scanWindow Time window in minutes to scan the log
-     * @return bool Returns true if values are valid, false otherwise
+     * @param int $cooldown Time in minutes before notifying the same error again
+     * @param int $scanWindow Time in minutes to scan past log entries
+     * @return bool True if valid, false otherwise
      */
     protected function validateConfig(int $cooldown, int $scanWindow): bool
     {

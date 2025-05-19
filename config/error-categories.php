@@ -10,7 +10,7 @@ return [
         'description' => 'Fallo en envío de correos',
     ],
 
-    // Data base
+    // Database
     [
         'keywords' => ['sql', 'pdo', 'database', 'mysql', 'pgsql', 'oracle', 'sqlsrv', 'deadlock', 'constraint', 'foreign key', 'sqlstate', 'query'],
         'icon' => '🛢️',
@@ -18,7 +18,7 @@ return [
         'description' => 'Error de base de datos',
     ],
 
-    // Autenticación
+    // Auth
     [
         'keywords' => ['unauthorized', 'unauthenticated', 'token', 'session expired', 'csrf', 'forbidden', '403', '401'],
         'icon' => '🔐',
@@ -26,7 +26,7 @@ return [
         'description' => 'Error de autenticación',
     ],
 
-    // Archivos y permisos
+    // Permissions and files
     [
         'keywords' => ['file', 'filesystem', 'permission', 'open stream', 'failed to open', 'no such file', 'not writable', 'read-only file system'],
         'icon' => '📁',
@@ -42,7 +42,7 @@ return [
         'description' => 'Fallo en Redis/cache',
     ],
 
-    // Red / HTTP / cURL
+    // Network / HTTP / cURL
     [
         'keywords' => ['curl', 'timeout', 'http', 'request', 'dns', 'server not found', 'host unreachable', '503', 'proxy', 'ssl', 'certificate'],
         'icon' => '🌐',
@@ -50,7 +50,7 @@ return [
         'description' => 'Fallo de red o HTTP',
     ],
 
-    // Fallos de ejecución interna
+    // App Internal errores
     [
         'keywords' => ['exception', 'error', 'runtime', 'undefined', 'class not found', 'method not found'],
         'icon' => '🧩',
