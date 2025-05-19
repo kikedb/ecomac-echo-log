@@ -34,6 +34,7 @@ class EchoLogServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/echo-log.php', 'echo-log');
+        $this->mergeConfigFrom(__DIR__ . '/../config/error-categories.php', 'error-categories');
         $this->app->bind(ClockProvider::class, CarbonService::class);
     }
 

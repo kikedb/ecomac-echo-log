@@ -24,22 +24,20 @@ class ErrorAnalizerService
     public function categorize(string $message): ErrorCategoryDto
     {
         $lower = strtolower($message);
+        $categories = config('error-categories');
 
-        return match (true) {
-            str_contains($lower, 'smtp') || str_contains($lower, 'mail') || str_contains($lower, 'connection refused') =>
-                new ErrorCategoryDto('📧', "Mail", "Fallo en envío de correos"),
-            str_contains($lower, 'sql') || str_contains($lower, 'pdo') || str_contains($lower, 'database') =>
-                new ErrorCategoryDto('🛢️', "DB", "Error de base de datos"),
-            str_contains($lower, 'unauthorized') || str_contains($lower, 'unauthenticated') || str_contains($lower, 'token') =>
-                new ErrorCategoryDto('🔐', "Auth", "Error de autenticación"),
-            str_contains($lower, 'file') || str_contains($lower, 'filesystem') || str_contains($lower, 'permission') =>
-                new ErrorCategoryDto('📁', "FS", "Error de archivos o permisos"),
-            str_contains($lower, 'redis') || str_contains($lower, 'cache') =>
-                new ErrorCategoryDto('🧠', "Cache", "Fallo en Redis/cache"),
-            str_contains($lower, 'curl') || str_contains($lower, 'timeout') || str_contains($lower, 'http') || str_contains($lower, 'request') =>
-                new ErrorCategoryDto('🌐', "Network", "Fallo de red o HTTP"),
-            default =>
-                new ErrorCategoryDto('❗', "Unknown", "Error no categorizado"),
-        };
+        foreach ($categories as $category) {
+            foreach ($category['keywords'] as $keyword) {
+                if (str_contains($lower, $keyword)) {
+                    return new ErrorCategoryDto(
+                        $category['icon'],
+                        $category['code'],
+                        $category['description']
+                    );
+                }
+            }
+        }
+
+        return new ErrorCategoryDto('❗', 'Unknown', 'Error no categorizado');
     }
 }

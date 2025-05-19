@@ -47,6 +47,22 @@ return [
     'app_name' => env('ECHO_LOG_APP_NAME', env('APP_NAME', 'Laravel')),
     'app_url' => env('ECHO_LOG_APP_URL', env('APP_URL', 'https://example.com')),
 
+
+    'levels' => [
+        'EMERGENCY' => [
+            'count' => env('ECHO_LOG_EMERGENCY_COUNT', 1), 
+        ],
+        'ALERT'     => [
+            'count' => env('ECHO_LOG_EMERGENCY_COUNT', 1), 
+        ],
+        'CRITICAL'  => [
+            'count' => env('ECHO_LOG_EMERGENCY_COUNT', 2), 
+        ],
+        'ERROR'     => [
+            'count' => env('ECHO_LOG_EMERGENCY_COUNT', 3),
+        ],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Notification Services

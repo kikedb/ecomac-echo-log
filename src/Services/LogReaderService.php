@@ -41,11 +41,33 @@ class LogReaderService
         if (!file_exists($logPath)) return collect();
 
         $content = file_get_contents($logPath);
-        preg_match_all('/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*?ERROR.*?: (.*)/', $content, $matches, PREG_SET_ORDER);
+        $levels = array_keys(config('echo-log.levels'));
+        $allMatches = collect();
 
-        return collect($matches)->filter(function ($match) use ($scanWindow) {
-            $timestamp = $this->clock->createFromFormat('Y-m-d H:i:s', $match[1]);
-            return $this->clock->greaterThanOrEqualTo($timestamp, $this->clock->subMinutes($this->clock->now(), $scanWindow));
-        });
+                
+        foreach ($levels as $level) {
+                // Escapar correctamente el nivel para regex (por si acaso)
+                $escapedLevel = preg_quote($level, '/');
+
+                // Regex para capturar [fecha] LEVEL: mensaje
+                preg_match_all(
+                    "/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*?$escapedLevel.*?: (.*)/",
+                    $content,
+                    $matches,
+                    PREG_SET_ORDER
+                );
+
+                $filtered = collect($matches)->filter(function ($match) use ($scanWindow) {
+                    $timestamp = $this->clock->createFromFormat('Y-m-d H:i:s', $match[1]);
+                    return $this->clock->greaterThanOrEqualTo(
+                        $timestamp,
+                        $this->clock->subMinutes($this->clock->now(), $scanWindow)
+                    );
+                });
+
+                $allMatches = $allMatches->merge($filtered);
+            }
+
+            return $allMatches->values();
     }
 }
