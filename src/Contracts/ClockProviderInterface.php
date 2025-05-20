@@ -5,11 +5,11 @@ namespace Ecomac\EchoLog\Contracts;
 use DateTimeInterface;
 
 /**
- * Interface ClockProvider
+ * Interface ClockProviderInterface
  *
  * Provides methods to get and manipulate date and time.
  */
-interface ClockProvider
+interface ClockProviderInterface
 {
     /**
      * Get the current date and time.

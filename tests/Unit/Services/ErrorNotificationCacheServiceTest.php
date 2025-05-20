@@ -2,22 +2,22 @@
 
 namespace Tests\Unit;
 
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 use Ecomac\EchoLog\Services\ErrorNotificationCacheService;
 use Ecomac\EchoLog\Tests\TestCase;
 use Mockery;
 class ErrorNotificationCacheServiceTest extends TestCase
 {
     private string $logFile;
-    private ClockProvider $clock;
+    private ClockProviderInterface $clock;
     private ErrorNotificationCacheService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Crear un mock de ClockProvider
-        $this->clock = Mockery::mock(ClockProvider::class);
+        // Crear un mock de ClockProviderInterface
+        $this->clock = Mockery::mock(ClockProviderInterface::class);
 
         // Crear archivo temporal para el cache
         $this->logFile = storage_path('app/test_log_monitor_cache.json');
@@ -61,7 +61,7 @@ class ErrorNotificationCacheServiceTest extends TestCase
         $past = new \DateTimeImmutable($pastTime);
         $now = new \DateTimeImmutable($nowTime);
 
-        // Mockeamos ClockProvider para devolver estos valores
+        // Mockeamos ClockProviderInterface para devolver estos valores
         $this->clock->shouldReceive('createFromFormat')
             ->with('Y-m-d H:i:s', $pastTime)
             ->andReturn($past);

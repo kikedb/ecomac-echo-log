@@ -3,7 +3,7 @@
 namespace Ecomac\EchoLog\Services;
 
 use Illuminate\Support\Collection;
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 
 /**
  * Class LogReaderService
@@ -22,9 +22,9 @@ class LogReaderService
     /**
      * Constructor.
      *
-     * @param ClockProvider $clock Provides date/time utility methods.
+     * @param ClockProviderInterface $clock Provides date/time utility methods.
      */
-    public function __construct(private ClockProvider $clock) {}
+    public function __construct(private ClockProviderInterface $clock) {}
 
     /**
      * Retrieves recent error log entries within a specified scan window (in minutes).
@@ -44,7 +44,7 @@ class LogReaderService
         $levels = array_keys(config('echo-log.levels'));
         $allMatches = collect();
 
-                
+
         foreach ($levels as $level) {
                 // Escapar correctamente el nivel para regex (por si acaso)
                 $escapedLevel = preg_quote($level, '/');

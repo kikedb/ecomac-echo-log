@@ -2,7 +2,7 @@
 
 namespace Ecomac\EchoLog\Services;
 
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 
 /**
  * Class ErrorNotificationCacheService
@@ -24,9 +24,9 @@ class ErrorNotificationCacheService
     /**
      * Constructor.
      *
-     * @param ClockProvider $clock A clock provider instance used for date/time operations.
+     * @param ClockProviderInterface $clock A clock provider instance used for date/time operations.
      */
-    public function __construct(private ClockProvider $clock)
+    public function __construct(private ClockProviderInterface $clock)
     {
         $this->path = storage_path('app/log_monitor_cache.json');
     }

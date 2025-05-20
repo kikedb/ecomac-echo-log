@@ -6,7 +6,7 @@ use Ecomac\EchoLog\Dto\ErrorDetailDto;
 use Ecomac\EchoLog\Dto\ErrorContextDto;
 use Ecomac\EchoLog\Dto\RecurrentErrorDto;
 use Ecomac\EchoLog\Services\EmailService;
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 use Ecomac\EchoLog\Services\DiscordService;
 use Ecomac\EchoLog\Services\ErrorAnalizerService;
 
@@ -27,13 +27,13 @@ class ErrorNotifierService
     /**
      * Constructor.
      *
-     * @param ClockProvider $clock Clock provider to handle time operations.
+     * @param ClockProviderInterface $clock Clock provider to handle time operations.
      * @param DiscordService $discordService Service to send notifications to Discord.
      * @param EmailService $emailService Service to send email notifications.
      * @param ErrorAnalizerService $errorAnalizer Service to categorize and analyze errors.
      */
     public function __construct(
-        private ClockProvider $clock,
+        private ClockProviderInterface $clock,
         private DiscordService $discordService,
         private EmailService $emailService,
         private ErrorAnalizerService $errorAnalizer,

@@ -2,6 +2,7 @@
 
 namespace Ecomac\EchoLog\Services;
 
+use Ecomac\EchoLog\Contracts\StringHelperInterface;
 use Illuminate\Support\Facades\Http;
 use Ecomac\EchoLog\Dto\RecurrentErrorDto;
 
@@ -12,6 +13,11 @@ use Ecomac\EchoLog\Dto\RecurrentErrorDto;
  */
 class DiscordService
 {
+
+    public function __construct(
+        private StringHelperInterface $stringHelper,
+    ) {
+    }
     /**
      * Sends a notification message to Discord mentioning specific users.
      *
@@ -32,6 +38,7 @@ class DiscordService
             ->implode(' ');
 
         $message       = $recurrentError->details->messageText;
+        $message       = $this->stringHelper->limit($message, 150, ' (...)');
         $errorCategory = $recurrentError->details->category;
         $sourceName    = $recurrentError->context->sourceName;
         $scanWindow    = $recurrentError->context->scanWindow;

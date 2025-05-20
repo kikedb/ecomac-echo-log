@@ -6,20 +6,20 @@ use Ecomac\EchoLog\Tests\TestCase;
 use Ecomac\EchoLog\Services\ErrorNotifierService;
 use Ecomac\EchoLog\Services\DiscordService;
 use Ecomac\EchoLog\Services\EmailService;
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 use Ecomac\EchoLog\Services\ErrorAnalizerService;
 use Ecomac\EchoLog\Dto\ErrorCategoryDto;
 
 
 class ErrorNotifierServiceTest extends TestCase
 {
-    public ClockProvider $clock;
+    public ClockProviderInterface $clock;
 
      protected function setUp(): void
     {
         parent::setUp();
 
-        $this->clock = app()->make(ClockProvider::class);
+        $this->clock = app()->make(ClockProviderInterface::class);
     }
 
     public function test_sends_discord_and_email_notifications()
@@ -29,8 +29,8 @@ class ErrorNotifierServiceTest extends TestCase
         $scanWindow = 10;
 
         $now = $this->clock->createFromFormat('Y-m-d H:i:s', '2024-05-19 15:00:00');
-                
-        $clockMock = $this->createMock(ClockProvider::class);
+
+        $clockMock = $this->createMock(ClockProviderInterface::class);
         $clockMock->method('now')->willReturn($now);
 
         $discordServiceMock = $this->createMock(DiscordService::class);

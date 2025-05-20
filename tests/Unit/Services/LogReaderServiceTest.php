@@ -3,7 +3,7 @@
 namespace Ecomac\EchoLog\Tests\Services;
 
 use Ecomac\EchoLog\Services\LogReaderService;
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 use Illuminate\Support\Collection;
 use Ecomac\EchoLog\Tests\TestCase;
 use Carbon\Carbon;
@@ -11,19 +11,19 @@ use Carbon\Carbon;
 class LogReaderServiceTest extends TestCase
 {
     private string $logFile;
-    private ClockProvider $clock;
+    private ClockProviderInterface $clock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->clock = app()->make(ClockProvider::class);
+        $this->clock = app()->make(ClockProviderInterface::class);
         $now = $this->clock->createFromFormat('Y-m-d','2024-05-19');
         $this->logFile = storage_path('logs/laravel-' . $now->format('Y-m-d') . '.log');
         if (!is_dir(dirname($this->logFile))) {
             mkdir(dirname($this->logFile), 0777, true);
         }
-        
+
         // Crea contenido simulado
         file_put_contents($this->logFile, <<<LOG
         [2024-05-19 14:55:00] local.ERROR: Example error 1
@@ -48,9 +48,9 @@ class LogReaderServiceTest extends TestCase
 
     public function test_it_returns_recent_errors_within_window()
     {
-        $mockClock = $this->createMock(ClockProvider::class);
+        $mockClock = $this->createMock(ClockProviderInterface::class);
         $now = $this->clock->createFromFormat('Y-m-d H:i:s', '2024-05-19 15:00:00');
-        
+
         $mockClock->method('now')->willReturn($now);
         $mockClock->method('createFromFormat')->willReturnCallback(
             fn($format, $value) => Carbon::createFromFormat($format, $value)
@@ -61,7 +61,7 @@ class LogReaderServiceTest extends TestCase
         $mockClock->method('greaterThanOrEqualTo')->willReturnCallback(
             fn($a, $b) => $a->greaterThanOrEqualTo($b)
         );
-        
+
         $service = new LogReaderService($mockClock);
         $errors = $service->getRecentErrors(10);
         $this->assertInstanceOf(Collection::class, $errors);

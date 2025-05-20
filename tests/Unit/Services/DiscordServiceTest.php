@@ -1,5 +1,6 @@
 <?php
 
+use Ecomac\EchoLog\Contracts\StringHelperInterface;
 use Ecomac\EchoLog\Tests\TestCase;
 use Illuminate\Support\Facades\Http;
 use Ecomac\EchoLog\Dto\ErrorDetailDto;
@@ -18,7 +19,16 @@ class DiscordServiceTest extends TestCase
 
         $dto = $this->makeDummyDto();
 
-        $service = new DiscordService();
+        $stringHelper = Mockery::mock(StringHelperInterface::class);
+
+        $stringHelper->shouldReceive('limit')
+        ->once()
+        ->with($dto->details->messageText, 150, ' (...)')
+        ->andReturn('Test error');
+
+        $service = new DiscordService(
+            $stringHelper,
+        );
         $service->sendNotification($dto, ['123456789']);
 
         Http::assertSent(function ($request) {

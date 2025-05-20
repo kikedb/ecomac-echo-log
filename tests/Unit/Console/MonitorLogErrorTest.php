@@ -4,7 +4,6 @@ namespace Tests\Unit\Console;
 
 use Ecomac\EchoLog\Tests\TestCase;
 use Ecomac\EchoLog\Console\MonitorLogError;
-use Ecomac\EchoLog\Contracts\ClockProvider;
 use Ecomac\EchoLog\Services\LogReaderService;
 use Ecomac\EchoLog\Services\ErrorNotifierService;
 use Ecomac\EchoLog\Services\ErrorNotificationCacheService;
@@ -12,7 +11,6 @@ use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Input\ArrayInput;
 use  Illuminate\Console\OutputStyle;
-use Mockery;
 
 /**
  * @covers \Ecomac\EchoLog\Console\MonitorLogError
@@ -53,11 +51,8 @@ class MonitorLogErrorTest extends TestCase
         $cacheService->expects($this->once())->method('markAsNotified');
         $cacheService->expects($this->once())->method('clean');
 
-        $clockProvider = $this->createMock(ClockProvider::class);
-
         // Crear instancia del comando
         $command = new MonitorLogError(
-            $clockProvider,
             $logReaderService,
             $notifierService,
             $cacheService

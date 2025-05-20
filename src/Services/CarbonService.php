@@ -5,14 +5,14 @@ namespace Ecomac\EchoLog\Services;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Carbon\CarbonImmutable;
-use Ecomac\EchoLog\Contracts\ClockProvider;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 
 /**
  * Class CarbonService
  *
- * Implementation of ClockProvider using CarbonImmutable for date and time operations.
+ * Implementation of ClockProviderInterface using CarbonImmutable for date and time operations.
  */
-class CarbonService implements ClockProvider
+class CarbonService implements ClockProviderInterface
 {
     /**
      * Get the current date and time.

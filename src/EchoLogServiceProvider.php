@@ -2,10 +2,12 @@
 
 namespace Ecomac\EchoLog;
 
-use Ecomac\EchoLog\Contracts\ClockProvider;
-use Ecomac\EchoLog\Services\CarbonService;
 use Illuminate\Support\ServiceProvider;
+use Ecomac\EchoLog\Support\StringHelper;
+use Ecomac\EchoLog\Services\CarbonService;
 use Ecomac\EchoLog\Console\MonitorLogError;
+use Ecomac\EchoLog\Contracts\StringHelperInterface;
+use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 
 /**
  * Class EchoLogServiceProvider
@@ -27,7 +29,7 @@ class EchoLogServiceProvider extends ServiceProvider
      * Register services and bindings in Laravel's service container.
      *
      * This merges the package configuration with the application configuration,
-     * and binds the ClockProvider interface to the CarbonService implementation.
+     * and binds the ClockProviderInterface interface to the CarbonService implementation.
      *
      * @return void
      */
@@ -35,7 +37,8 @@ class EchoLogServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/echo-log.php', 'echo-log');
         $this->mergeConfigFrom(__DIR__ . '/../config/error-categories.php', 'error-categories');
-        $this->app->bind(ClockProvider::class, CarbonService::class);
+        $this->app->bind(ClockProviderInterface::class, CarbonService::class);
+        $this->app->bind(StringHelperInterface::class, StringHelper::class);
     }
 
     /**

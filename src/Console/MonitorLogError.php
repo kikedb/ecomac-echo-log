@@ -4,7 +4,6 @@ namespace Ecomac\EchoLog\Console;
 
 use Illuminate\Console\Command;
 use Ecomac\EchoLog\Services\ErrorNotificationCacheService;
-use Ecomac\EchoLog\Contracts\ClockProvider;
 use Ecomac\EchoLog\Services\LogReaderService;
 use Ecomac\EchoLog\Services\ErrorNotifierService;
 
@@ -36,13 +35,11 @@ class MonitorLogError extends Command
     /**
      * Creates a new command instance.
      *
-     * @param ClockProvider $clockProvider Provides the current time and date
      * @param LogReaderService $logReaderService Service to read recent log entries
      * @param ErrorNotifierService $errorNotifier Service to send error notifications
      * @param ErrorNotificationCacheService $cache Cache service to avoid duplicate notifications
      */
     public function __construct(
-        private ClockProvider $clockProvider,
         private LogReaderService $logReaderService,
         private ErrorNotifierService $errorNotifier,
         private ErrorNotificationCacheService $cache
@@ -71,7 +68,7 @@ class MonitorLogError extends Command
                 return;
             }
 
-            $levels = config('echolog.levels');
+            $levels = config('echo-log.levels');
             $recentErrorsRaw = $this->logReaderService->getRecentErrors($scanWindow);
 
             // Mapear errores con nivel, mensaje y fecha
@@ -110,8 +107,8 @@ class MonitorLogError extends Command
                     if ($this->cache->shouldNotify($hash, $cooldown)) {
                         // Enviamos la línea completa del primer error del grupo
                         $this->errorNotifier->send(
-                            $instances->first()['raw_line'], 
-                            count($instances), 
+                            $instances->first()['raw_line'],
+                            count($instances),
                             $scanWindow
                         );
                         $this->cache->markAsNotified($hash);
