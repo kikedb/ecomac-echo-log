@@ -38,7 +38,7 @@ class DiscordService
             ->implode(' ');
 
         $message       = $recurrentError->details->messageText;
-        $message       = $this->stringHelper->limit($message, 150, ' (...)');
+        $message       = $this->stringHelper->limit($message, 300, ' (...)');
         $errorCategory = $recurrentError->details->category;
         $sourceName    = $recurrentError->context->sourceName;
         $scanWindow    = $recurrentError->context->scanWindow;

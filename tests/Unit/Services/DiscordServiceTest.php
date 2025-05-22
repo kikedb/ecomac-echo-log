@@ -23,7 +23,7 @@ class DiscordServiceTest extends TestCase
 
         $stringHelper->shouldReceive('limit')
         ->once()
-        ->with($dto->details->messageText, 150, ' (...)')
+        ->with($dto->details->messageText, 300, ' (...)')
         ->andReturn('Test error');
 
         $service = new DiscordService(
