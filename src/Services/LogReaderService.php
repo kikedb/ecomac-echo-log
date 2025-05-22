@@ -2,38 +2,37 @@
 
 namespace Ecomac\EchoLog\Services;
 
+use Ecomac\EchoLog\Factories\LogEntryDtoFactory;
 use Illuminate\Support\Collection;
 use Ecomac\EchoLog\Contracts\ClockProviderInterface;
 
 /**
  * Class LogReaderService
  *
- * Service responsible for reading and filtering recent error logs
- * from Laravel's log files.
+ * This service is responsible for reading the current day's log file
+ * and extracting recent error entries based on the levels defined
+ * in the package configuration.
  *
- * This service parses the log file for the current date, extracts error entries,
- * and filters them based on a specified time window.
- *
- * Can be extended to support different log formats, multiple log files,
- * or additional log levels.
+ * @package Ecomac\EchoLog\Services
  */
 class LogReaderService
 {
     /**
-     * Constructor.
+     * LogReaderService constructor.
      *
-     * @param ClockProviderInterface $clock Provides date/time utility methods.
+     * @param ClockProviderInterface $clock Clock provider used to get the current time and compare timestamps.
      */
     public function __construct(private ClockProviderInterface $clock) {}
 
     /**
-     * Retrieves recent error log entries within a specified scan window (in minutes).
+     * Retrieves recent error log entries from the current day's log file.
      *
-     * Parses the current day's Laravel log file, extracts entries tagged as errors,
-     * and returns only those which occurred within the last $scanWindow minutes.
+     * This method scans the log file named `laravel-YYYY-MM-DD.log` and filters
+     * log entries based on the log levels defined in `config('echo-log.levels')`.
+     * Only entries that occurred within the specified time window are returned.
      *
-     * @param int $scanWindow Time window in minutes to look back for errors.
-     * @return Collection Returns a collection of matched error log entries.
+     * @param int $scanWindow Number of minutes to look back from the current time.
+     * @return Collection A collection of LogEntryDto objects representing recent errors.
      */
     public function getRecentErrors(int $scanWindow): Collection
     {
@@ -44,30 +43,28 @@ class LogReaderService
         $levels = array_keys(config('echo-log.levels'));
         $allMatches = collect();
 
-
         foreach ($levels as $level) {
-                // Escapar correctamente el nivel para regex (por si acaso)
-                $escapedLevel = preg_quote($level, '/');
+            $escapedLevel = preg_quote($level, '/');
 
-                // Regex para capturar [fecha] LEVEL: mensaje
-                preg_match_all(
-                    "/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*?$escapedLevel.*?: (.*)/",
-                    $content,
-                    $matches,
-                    PREG_SET_ORDER
+            preg_match_all(
+                "/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*?({$escapedLevel}).*?: (.*)/",
+                $content,
+                $matches,
+                PREG_SET_ORDER
+            );
+
+            $filtered = collect($matches)->filter(function ($match) use ($scanWindow) {
+                $timestamp = $this->clock->createFromFormat('Y-m-d H:i:s', $match[1]);
+                return $this->clock->greaterThanOrEqualTo(
+                    $timestamp,
+                    $this->clock->subMinutes($this->clock->now(), $scanWindow)
                 );
+            });
 
-                $filtered = collect($matches)->filter(function ($match) use ($scanWindow) {
-                    $timestamp = $this->clock->createFromFormat('Y-m-d H:i:s', $match[1]);
-                    return $this->clock->greaterThanOrEqualTo(
-                        $timestamp,
-                        $this->clock->subMinutes($this->clock->now(), $scanWindow)
-                    );
-                });
+            $allMatches = $allMatches->merge($filtered);
+        }
 
-                $allMatches = $allMatches->merge($filtered);
-            }
-
-            return $allMatches->values();
+        $logEntries = $allMatches->map(fn($entry) => (new LogEntryDtoFactory())->createFromLogEntry($entry));
+        return $logEntries;
     }
 }

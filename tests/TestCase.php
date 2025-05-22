@@ -31,6 +31,7 @@ abstract class TestCase extends BaseTestCase
             'ERROR' => ['count' => 3],
             'CRITICAL' => ['count' => 2],
             'EMERGENCY' => ['count' => 1],
+            'ALERT' => ['count' => 1],
         ]);
 
     }

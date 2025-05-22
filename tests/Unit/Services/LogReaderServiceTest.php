@@ -66,10 +66,10 @@ class LogReaderServiceTest extends TestCase
         $errors = $service->getRecentErrors(10);
         $this->assertInstanceOf(Collection::class, $errors);
         $this->assertCount(7, $errors);
-        $this->assertStringContainsString('Example error 1', $errors[5][0]);
-        $this->assertStringContainsString('Example error 3', $errors[6][0]);
-        $this->assertStringContainsString('Example emergency 1', $errors[0][0]);
-        $this->assertStringContainsString('Example critical 2', $errors[4][0]);
-        $this->assertStringContainsString('Example alert 1', $errors[1][0]);
+        $this->assertStringContainsString('Example error 1', $errors[5]->rawLine);
+        $this->assertStringContainsString('Example error 3', $errors[6]->rawLine);
+        $this->assertStringContainsString('Example emergency 1', $errors[0]->rawLine);
+        $this->assertStringContainsString('Example critical 2', $errors[4]->rawLine);
+        $this->assertStringContainsString('Example alert 1', $errors[1]->rawLine);
     }
 }

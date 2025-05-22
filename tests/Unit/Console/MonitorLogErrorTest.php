@@ -3,14 +3,14 @@
 namespace Tests\Unit\Console;
 
 use Ecomac\EchoLog\Tests\TestCase;
+use Ecomac\EchoLog\Dto\LogEntryDto;
+use Illuminate\Console\OutputStyle;
 use Ecomac\EchoLog\Console\MonitorLogError;
 use Ecomac\EchoLog\Services\LogReaderService;
-use Ecomac\EchoLog\Services\ErrorNotifierService;
-use Ecomac\EchoLog\Services\ErrorNotificationCacheService;
-use Illuminate\Support\Facades\Config;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Input\ArrayInput;
-use Illuminate\Console\OutputStyle;
+use Ecomac\EchoLog\Services\ErrorNotifierService;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Ecomac\EchoLog\Services\ErrorNotificationCacheService;
 
 /**
  * @covers \Ecomac\EchoLog\Console\MonitorLogError
@@ -24,11 +24,26 @@ class MonitorLogErrorTest extends TestCase
     public function test_it_sends_notification_when_error_exceeds_threshold()
     {
         // Mock error data
-        $mockErrors = collect([
-            ['[2025-05-19 14:58:02] local.ERROR: Database connection failed', '2025-05-19 14:58:02', 'Database connection failed'],
-            ['[2025-05-19 14:58:03] local.ERROR: Database connection failed', '2025-05-19 14:58:03', 'Database connection failed'],
-            ['[2025-05-19 14:58:04] local.ERROR: Database connection failed', '2025-05-19 14:58:04', 'Database connection failed'],
-        ]);
+        $mockErrors = collect($mockErrors = collect([
+            new LogEntryDto(
+                '[2025-05-19 14:58:02] local.ERROR: Database connection failed',
+                '2025-05-19 14:58:02',
+                'ERROR',
+                'Database connection failed'
+            ),
+            new LogEntryDto(
+                '[2025-05-19 14:58:03] local.ERROR: Database connection failed',
+                '2025-05-19 14:58:03',
+                'ERROR',
+                'Database connection failed'
+            ),
+            new LogEntryDto(
+                '[2025-05-19 14:58:04] local.ERROR: Database connection failed',
+                '2025-05-19 14:58:04',
+                'ERROR',
+                'Database connection failed'
+            ),
+        ]));
 
         // Create mocks
         $logReaderService = $this->createMock(LogReaderService::class);
@@ -65,7 +80,12 @@ class MonitorLogErrorTest extends TestCase
     {
         // Mock data: only one occurrence of EMERGENCY
         $mockErrors = collect([
-            ['[2025-05-20 08:00:00] local.EMERGENCY: System failure detected', '2025-05-20 08:00:00', 'System failure detected'],
+             new LogEntryDto(
+                '[2025-05-20 08:00:00] local.EMERGENCY: System failure detected',
+                '2025-05-20 08:00:00',
+                'EMERGENCY',
+                'System failure detected'
+             )
         ]);
 
         // Mock services
@@ -101,8 +121,18 @@ class MonitorLogErrorTest extends TestCase
     {
         // Mock data: two occurrences of CRITICAL error
         $mockErrors = collect([
-            ['[2025-05-19 14:58:02] local.CRITICAL: A critical error found!', '2025-05-19 14:58:02', 'A critical error found!'],
-            ['[2025-05-19 14:58:03] local.CRITICAL: A critical error found!', '2025-05-19 14:58:03', 'A critical error found!'],
+             new LogEntryDto(
+                '[2025-05-19 14:58:02] local.CRITICAL: A critical error found!', // Línea completa
+                '2025-05-19 14:58:02',                                          // Timestamp
+                'CRITICAL',                                                      // Nivel del error (¡clave para las notificaciones!)
+                'A critical error found!'                                        // Mensaje
+             ),
+             new LogEntryDto(
+                '[2025-05-19 14:58:03] local.CRITICAL: A critical error found!',
+                '2025-05-19 14:58:03',
+                'CRITICAL',
+                'A critical error found!'
+             )
         ]);
 
         // Mock services
@@ -136,14 +166,20 @@ class MonitorLogErrorTest extends TestCase
 
     public function test_it_does_not_send_notification_if_threshold_not_reached()
     {
-        // Set threshold to 3
-        Config::set('echo-log.levels', [
-            'ERROR' => ['count' => 3],
-        ]);
         // Simulate only 2 errors
         $mockErrors = collect([
-            ['[2025-05-20 09:00:00] local.ERROR: DB error', '2025-05-20 09:00:00', 'DB error'],
-            ['[2025-05-20 09:01:00] local.ERROR: DB error', '2025-05-20 09:01:00', 'DB error'],
+             new LogEntryDto(
+                '[2025-05-20 09:00:00] local.ERROR: DB error',
+                '2025-05-20 09:00:00',
+                'ERROR',
+                'DB error'
+             ),
+             new LogEntryDto(
+                '[2025-05-20 09:01:00] local.ERROR: DB error',
+                '2025-05-20 09:01:00',
+                'ERROR',
+                'DB error'
+             )
         ]);
 
         // Mock services

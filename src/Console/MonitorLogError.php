@@ -69,34 +69,14 @@ class MonitorLogError extends Command
             }
 
             $levels = config('echo-log.levels');
-            $recentErrorsRaw = $this->logReaderService->getRecentErrors($scanWindow);
-
-            // Mapear errores con nivel, mensaje y fecha
-            $parsedErrors = collect($recentErrorsRaw)->map(function ($error) {
-                $rawLine = $error[0]; // Formato completo del log
-                $timestamp = $error[1];
-                $message = $error[2];  // Solo el mensaje de error
-
-                // Extraer el nivel del formato local.ERROR:
-                preg_match('/\.([A-Z]+):/', $rawLine, $matches);
-                $level = $matches[1] ?? 'UNKNOWN';
-
-                return [
-                    'raw_line' => $rawLine,  // Mantenemos la línea completa para notificación
-                    'level' => $level,      // Nivel extraído (ERROR, WARNING, etc.)
-                    'message' => $message,   // Solo el mensaje
-                    'timestamp' => $timestamp,
-                ];
-            });
-
-            // Agrupar por nivel
-            $groupedByLevel = $parsedErrors->groupBy('level');
+            /** @var \Illuminate\Support\Collection<int, \Ecomac\EchoLog\Dto\LogEntryDto> $logEntries */
+            $logEntries = $this->logReaderService->getRecentErrors($scanWindow);
+            $groupedByLevel = $logEntries->groupBy('level');
 
             foreach ($groupedByLevel as $level => $errorsByLevel) {
                 $countRequired = $levels[$level]['count'] ?? 3;
 
                 $groupedByMessage = collect($errorsByLevel)->groupBy('message');
-
                 foreach ($groupedByMessage as $message => $instances) {
                     if (count($instances) < $countRequired) {
                         continue;
@@ -107,7 +87,7 @@ class MonitorLogError extends Command
                     if ($this->cache->shouldNotify($hash, $cooldown)) {
                         // Enviamos la línea completa del primer error del grupo
                         $this->errorNotifier->send(
-                            $instances->first()['raw_line'],
+                            $instances->first()->rawLine,
                             count($instances),
                             $scanWindow
                         );
