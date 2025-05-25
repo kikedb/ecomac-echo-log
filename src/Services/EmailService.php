@@ -26,7 +26,8 @@ class EmailService
     public function sendNotification(RecurrentErrorDto $recurrentError, array $recipients): void
     {
         foreach ($recipients as $recipient) {
-            Mail::to(trim($recipient))->send(
+            $mailer = config('echo-log.mailer');
+            Mail::mailer($mailer)->to(trim($recipient))->send(
                 new RecurrentErrorMail($recurrentError)
             );
             echo "📧 Alerta envia por correo a $recipient" . PHP_EOL;

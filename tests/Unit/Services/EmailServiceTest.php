@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 
+use Mockery;
 use Ecomac\EchoLog\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Ecomac\EchoLog\Dto\ErrorDetailDto;
@@ -59,5 +60,103 @@ class EmailServiceTest extends TestCase
         $dto = $this->makeDummyDto();
         $emailService->sendNotification($dto, []);
         Mail::assertNothingSent();
+    }
+
+    public function test_send_notification_sends_emails_to_all_recipients()
+    {
+        Mail::fake();
+
+        config(['echo-log.mailer' => 'mailgun']);
+
+        $recipients = config('echo-log.email_recipients');
+
+        $errorDto = new RecurrentErrorDto(
+            details: new ErrorDetailDto(
+                messageText: 'Test error',
+                category: new ErrorCategoryDto(
+                    emoji: '❗',
+                    type: 'Critical',
+                    title: 'Critical Error',
+                ),
+            ),
+            context: new ErrorContextDto(
+                sourceName: 'My System',
+                scanWindow: 15,
+                date: now()->toIso8601String(),
+            ),
+            count: 3,
+        );
+
+        $emailService = new EmailService();
+
+        $emailService->sendNotification($errorDto, $recipients);
+
+        foreach ($recipients as $recipient) {
+            Mail::assertSent(RecurrentErrorMail::class, function ($mail) use ($recipient, $errorDto) {
+                return $mail->hasTo($recipient) &&
+                        $mail->recurrentError->details->category === $errorDto->details->category &&
+                        $mail->recurrentError->details->category->emoji === $errorDto->details->category->emoji;
+            });
+        }
+
+        Mail::assertSent(RecurrentErrorMail::class, count($recipients));
+    }
+    public function test_send_notification_uses_custom_mailer_from_config()
+    {
+        // Configuramos el mailer personalizado
+        config(['echo-log.mailer' => 'mailgun']);
+
+        config(['echo-log.email_recipients' => ['test@mail.com']]);
+
+        $recipients = config('echo-log.email_recipients');
+
+        $errorDto = Mockery::mock(RecurrentErrorDto::class);
+
+        $mailerMock = Mockery::mock();
+        $mailerMock->shouldReceive('to')
+            ->with('test@mail.com')
+            ->once()
+            ->andReturnSelf();
+
+        $mailerMock->shouldReceive('send')
+            ->once()
+            ->with(Mockery::type(RecurrentErrorMail::class));
+
+        // // Mock para Facade Mail
+        Mail::shouldReceive('mailer')
+            ->once()
+            ->with('mailgun')
+            ->andReturn($mailerMock);
+
+        $emailService = new EmailService();
+        $emailService->sendNotification($errorDto, $recipients);
+    }
+
+    public function test_send_notification_uses_default_mailer_when_no_config()
+    {
+        config(['echo-log.mailer' => null]);
+        config(['echo-log.email_recipients' => ['test@mail.com']]);
+        $recipients = config('echo-log.email_recipients');
+
+        $errorDto = Mockery::mock(RecurrentErrorDto::class);
+
+
+        $mailerMock = Mockery::mock();
+        $mailerMock->shouldReceive('to')
+            ->once()
+            ->with('test@mail.com')
+            ->andReturnSelf();
+
+        $mailerMock->shouldReceive('send')
+            ->once()
+            ->with(Mockery::type(RecurrentErrorMail::class));
+
+        Mail::shouldReceive('mailer')
+            ->once()
+            ->with(null)
+            ->andReturn($mailerMock);
+
+        $emailService = new EmailService();
+        $emailService->sendNotification($errorDto, $recipients);
     }
 }

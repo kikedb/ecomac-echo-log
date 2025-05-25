@@ -30,6 +30,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mailer Connection
+    |--------------------------------------------------------------------------
+    |
+    | You can specify a mailer connection from config/mail.php to be used
+    | exclusively by this package. If null, it will use Laravel’s default mailer.
+    |
+    */
+
+    'mailer' => env('ECHO_LOG_MAILER', null),
+    /*
+    |--------------------------------------------------------------------------
     | Email Recipients
     |--------------------------------------------------------------------------
     |

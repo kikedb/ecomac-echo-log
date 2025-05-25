@@ -25,6 +25,8 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('echo-log.app_name', 'Mi App');
         $app['config']->set('echo-log.app_url', 'https://miapp.test');
 
+        $app['config']->set('echo-log.log', 'https://miapp.test');
+
         $app['config']->set('echo-log.cooldown_minutes', 10);
         $app['config']->set('echo-log.scan_window_minutes', 5);
         $app['config']->set('echolog.levels', [
