@@ -93,7 +93,6 @@ return [
         'discord' => [
             'webhook_url' => env('DISCORD_WEBHOOK_URL'),
             'mention_user_ids' => explode(',', env('DISCORD_MENTION_USER_IDS', '')),
-            'app_name' => env('APP_NAME', 'Laravel'),
         ],
     ],
 

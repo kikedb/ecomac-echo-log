@@ -65,7 +65,7 @@ class ErrorNotifierService
     {
         $webhookUrl = config('echo-log.services.discord.webhook_url');
         $userIds = config('echo-log.services.discord.mention_user_ids');
-        $sourceName = config('echo-log.services.discord.app_name');
+        $sourceName = config('echo-log.app_name');
 
         if (!$webhookUrl || empty($userIds)) {
             echo "⚠️ Webhook de Discord o usuarios no configurados.";
