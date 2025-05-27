@@ -10,7 +10,7 @@
         <p>Se ha detectado un error repetido en el log de {{ $recurrentError->context->sourceName }}:</p>
 
         <h4>📝 Mensaje:</h4>
-        <pre style="background: #f0f0f0; padding: 10px; border-left: 4px solid #e74c3c;">{{ $recurrentError->details->messageText }}</pre>
+        <pre style="background: #f0f0f0; padding: 10px; border-left: 4px solid #e74c3c; white-space: pre-wrap; word-wrap: break-word;">{{ $recurrentError->details->messageText }}</pre>
 
         <p><strong>🔁 Ocurrencias:</strong> {{ $recurrentError->count }} veces en los últimos {{ $recurrentError->context->scanWindow }} minutos.</p>
         <p><strong>📅 Fecha:</strong> {{ $recurrentError->context->date }}</p>
