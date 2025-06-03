@@ -1,17 +1,19 @@
 # EchoLog
 
-**EchoLog** es un paquete para Laravel que monitorea el archivo de logs de tu aplicación y envía alertas cuando detecta errores repetitivos. Es ideal para mantener un seguimiento proactivo de fallos en producción mediante notificaciones por Discord y correo electrónico.
+**EchoLog** es un paquete para Laravel que monitorea el archivo de logs de tu aplicación y envía alertas cuando detecta errores repetitivos o críticos. Es ideal para mantener un seguimiento proactivo de fallos en producción mediante notificaciones por Discord y correo electrónico.
 
 ---
 
 ## 🚀 Características
 
-- Monitorea el archivo de log de Laravel (`storage/logs/laravel-*.log`)
-- Detecta errores repetidos en un intervalo de tiempo configurable
+- Monitorea el archivo de log de Laravel diario (`storage/logs/laravel-*.log`)
+- Detecta errores repetidos o críticos en un intervalo de tiempo configurable
 - Clasifica errores comunes (DB, red, permisos, correo, etc.)
+- Soporte para niveles de severidad: `emergency`, `alert`, `critical`, `error`
 - Notifica por:
   - ✅ Discord Webhook (con menciones personalizadas)
-  - ✅ Correo electrónico (HTML)
+  - ✅ Correo electrónico
+- Envío de correos usando **conexiones personalizadas** (además de la configuración por defecto)
 - Evita notificaciones duplicadas mediante sistema de caché
 - Limpieza automática del archivo de caché
 - Totalmente configurable desde `config/echo-log.php`
@@ -23,88 +25,44 @@
 
 ---
 
----
-
 ## 📦 Instalación
 
 ```bash
 composer require ecomac/echo-log
 ```
 
-Publica la configuración:
+## Publica el archivo de configuración
 
 ```bash
 php artisan vendor:publish --tag=echo-log-config
 ```
 
----
+##  🧪 Uso
 
-## ⚙️ Configuración
-
-Edita `config/echo-log.php` con tus parámetros:
-
-```php
-return [
-    'app_name' => env('APP_NAME', 'Laravel'),
-    'app_url' => env('APP_URL', 'http://localhost'),
-
-    'scan_window_minutes' => 10,
-    'cooldown_minutes' => 30,
-
-    'email_recipients' => [
-        'admin@example.com',
-    ],
-
-    'services' => [
-        'discord' => [
-            'webhook_url' => env('DISCORD_WEBHOOK'),
-            'mention_user_ids' => ['1234567890'],
-            'app_name' => env('APP_NAME', 'Laravel'),
-        ],
-    ],
-];
-```
-
----
-
-## 🧪 Uso
-
-Ejecuta el comando para analizar el log y enviar notificaciones si se detectan errores repetidos:
+Ejecuta el comando para analizar el log y enviar notificaciones si se detectan errores repetidos o críticos:
 
 ```bash
 php artisan ecomac:monitor-log-error
 ```
-
-Te recomendamos programar este comando en el scheduler (`app/Console/Kernel.php`):
+Te recomendamos programar este comando en el scheduler `app/Console/Kernel.php`
 
 ```php
 $schedule->command('ecomac:monitor-log-error')->everyFiveMinutes();
 ```
 
----
-
 ## 🧠 Categorización de errores
 
 Los errores se agrupan por tipo para enviar notificaciones más claras:
 
-| Categoría     | Ejemplo de errores                       |
-|---------------|------------------------------------------|
-| 📧 Mail        | smtp, mail, connection refused           |
-| 🛢️ DB         | sql, pdo, database                       |
-| 🔐 Auth       | unauthorized, unauthenticated, token     |
-| 📁 FS         | file, filesystem, permission             |
-| 🧠 Cache      | redis, cache                             |
-| 🌐 Network    | curl, timeout, http, request             |
-| ❗ Unknown     | Cualquier otro error                     |
-
----
-
-## 💬 Notificaciones
-
-- **Discord**: Notificaciones con formato embebido, menciones y colores.
-- **Correo**: Notificaciones con un diseño HTML básico.
-
----
+| Categoría     | Ejemplo de errores                          |
+|---------------|---------------------------------------------|
+| 📧 Mail       | smtp, mail, connection refused, sendmail    |
+| 🛢️ DB         | sql, pdo, database, mysql, deadlock         |
+| 🔐 Auth       | unauthorized, unauthenticated, token         |
+| 📁 FS         | file, permission, not writable               |
+| 🧠 Cache      | redis, cache, memcached                      |
+| 🌐 Network    | curl, timeout, dns, http, ssl                |
+| 🧩 App        | exception, class not found, runtime error    |
 
 ## 📸 Vistas previas
 
