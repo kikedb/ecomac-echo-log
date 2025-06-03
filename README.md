@@ -70,7 +70,7 @@ Los errores se agrupan por tipo para enviar notificaciones más claras:
 ![Discord Preview](docs/discord-preview.png)
 
 ### Correo electrónico
-![Email Preview](docs/email-preview.png)
+![Email Preview](docs/email-preview.png?v=2)
 
 ## 🧑‍💻 Contribuciones
 
